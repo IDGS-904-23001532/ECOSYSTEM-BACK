@@ -171,6 +171,10 @@ Icon
 .VolumeIcon.icns
 .com.apple.timemachine.donotpresent
 
+# .NET / C# Compilation outputs
+bin/
+obj/
+
 # IDE / Editors
 # Visual Studio
 .vs/
