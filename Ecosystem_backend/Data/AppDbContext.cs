@@ -16,6 +16,14 @@ namespace Ecosystem_backend.Data
         public DbSet<Usuario> Usuarios { get; set; }
         public DbSet<Cliente> Clientes { get; set; }
         public DbSet<Empleado> Empleados { get; set; }
+        public DbSet<Prospecto> Prospectos { get; set; }
+        public DbSet<Venta> Ventas { get; set; }
+        public DbSet<Producto> Productos { get; set; }
+        public DbSet<Cotizacion> Cotizaciones { get; set; }
+        public DbSet<DetalleCotizacion> DetallesCotizaciones { get; set; }
+        public DbSet<Proveedor> Proveedores { get; set; }
+        public DbSet<Gasto> Gastos { get; set; }
+        public DbSet<OrdenServicio> OrdenesServicio { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -23,10 +31,6 @@ namespace Ecosystem_backend.Data
 
             // Configuramos explícitamente que la relación IdUsuario debe ser única 
             // en Clientes y Empleados para asegurar el 1:1
-
-            modelBuilder.Entity<Cliente>()
-                .HasIndex(c => c.IdUsuario)
-                .IsUnique();
 
             modelBuilder.Entity<Empleado>()
                 .HasIndex(e => e.IdUsuario)
