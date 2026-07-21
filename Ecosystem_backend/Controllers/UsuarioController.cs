@@ -19,55 +19,19 @@ namespace Ecosystem_backend.Controllers
             _context = context;
         }
 
-        [HttpPost("registro-cliente")]
-        public async Task<IActionResult> RegistrarCliente([FromBody] RegistroClienteDto request)
-        {
-            // 1. Validar que el correo no exista ya
-            var existeUsuario = _context.Usuarios.Any(u => u.Correo == request.Correo);
-            if (existeUsuario)
-            {
-                return BadRequest("El correo ya está registrado.");
-            }
-
-            // 2. Crear el Usuario base
-            var nuevoUsuario = new Usuario
-            {
-                Correo = request.Correo,
-                // tenemos que encriptar la contrasenia (prox)
-                PasswordHash = request.Password,
-                IdRol = 1, //  es el ID del rol 'Cliente' en la BD
-                Activo = true
-            };
-
-            _context.Usuarios.Add(nuevoUsuario);
-            await _context.SaveChangesAsync(); // Guardamos para que se genere el IdUsuario
-
-            // 3. Crear el Cliente vinculado al Usuario recién creado
-            var nuevoCliente = new Cliente
-            {
-                IdUsuario = nuevoUsuario.IdUsuario,
-                NombreCompleto = request.NombreCompleto,
-                DireccionInstalacion = request.DireccionInstalacion,
-                Telefono = request.Telefono
-            };
-
-            _context.Clientes.Add(nuevoCliente);
-            await _context.SaveChangesAsync(); // Guardamos el cliente
-
-            return Ok(new { Mensaje = "Cliente registrado con éxito", IdCliente = nuevoCliente.IdCliente });
-        }
+        // ❌ Eliminamos RegistrarCliente porque ahora los clientes nacen al aceptar una cotización
 
         [HttpPost("registro-empleado")]
         public async Task<IActionResult> RegistrarEmpleado([FromBody] RegistroEmpleadoDto request)
         {
-            // 1. Validar que el correo no exista ya en el sistema
-            var existeUsuario = _context.Usuarios.Any(u => u.Correo == request.Correo);
+            // 1. Validar que el correo no exista ya en el sistema usando AnyAsync
+            var existeUsuario = await _context.Usuarios.AnyAsync(u => u.Correo == request.Correo);
             if (existeUsuario)
             {
                 return BadRequest("El correo ya está registrado.");
             }
 
-            // 2. Crear el Usuario base
+            // 2. Crear el Usuario base (AHORA EXCLUSIVO PARA EMPLEADOS)
             var nuevoUsuario = new Usuario
             {
                 Correo = request.Correo,
@@ -98,8 +62,8 @@ namespace Ecosystem_backend.Controllers
         [HttpGet("listar-clientes")]
         public async Task<IActionResult> ListarClientes()
         {
-            
-            var listaClientes = _context.Clientes.ToList();
+            // Usamos ToListAsync para no bloquear el hilo de ejecución
+            var listaClientes = await _context.Clientes.ToListAsync();
 
             return Ok(listaClientes);
         }
@@ -107,7 +71,7 @@ namespace Ecosystem_backend.Controllers
         [HttpGet("listar-empleados")]
         public async Task<IActionResult> ListarEmpleados()
         {
-            var listaEmpleados = _context.Empleados.ToList();
+            var listaEmpleados = await _context.Empleados.ToListAsync();
 
             return Ok(listaEmpleados);
         }

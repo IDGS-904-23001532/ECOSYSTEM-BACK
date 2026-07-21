@@ -4,6 +4,7 @@ using Ecosystem_backend.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Ecosystem_backend.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260721054046_AjusteFlujoDB")]
+    partial class AjusteFlujoDB
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -30,10 +33,6 @@ namespace Ecosystem_backend.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("IdCliente"));
 
-                    b.Property<string>("Apellido")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
                     b.Property<string>("Corporativo")
                         .HasColumnType("longtext");
 
@@ -44,15 +43,13 @@ namespace Ecosystem_backend.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("Localidad")
-                        .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<string>("Nombre")
+                    b.Property<string>("NombreCompleto")
                         .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<string>("Telefono")
-                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.HasKey("IdCliente");

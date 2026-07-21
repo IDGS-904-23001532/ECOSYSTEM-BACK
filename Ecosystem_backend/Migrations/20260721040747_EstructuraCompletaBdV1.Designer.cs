@@ -4,6 +4,7 @@ using Ecosystem_backend.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Ecosystem_backend.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260721040747_EstructuraCompletaBdV1")]
+    partial class EstructuraCompletaBdV1
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -30,34 +33,26 @@ namespace Ecosystem_backend.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("IdCliente"));
 
-                    b.Property<string>("Apellido")
-                        .IsRequired()
-                        .HasColumnType("longtext");
+                    b.Property<string>("DireccionInstalacion")
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)");
 
-                    b.Property<string>("Corporativo")
-                        .HasColumnType("longtext");
-
-                    b.Property<DateTime>("FechaRegistro")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<int?>("IdProspecto")
+                    b.Property<int>("IdUsuario")
                         .HasColumnType("int");
 
-                    b.Property<string>("Localidad")
+                    b.Property<string>("NombreCompleto")
                         .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("Nombre")
-                        .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasMaxLength(150)
+                        .HasColumnType("varchar(150)");
 
                     b.Property<string>("Telefono")
-                        .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasMaxLength(20)
+                        .HasColumnType("varchar(20)");
 
                     b.HasKey("IdCliente");
 
-                    b.HasIndex("IdProspecto");
+                    b.HasIndex("IdUsuario")
+                        .IsUnique();
 
                     b.ToTable("Clientes");
                 });
@@ -69,10 +64,6 @@ namespace Ecosystem_backend.Migrations
                         .HasColumnType("int");
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("IdCotizacion"));
-
-                    b.Property<string>("Estatus")
-                        .IsRequired()
-                        .HasColumnType("longtext");
 
                     b.Property<DateTime>("FechaEmision")
                         .HasColumnType("datetime(6)");
@@ -379,11 +370,13 @@ namespace Ecosystem_backend.Migrations
 
             modelBuilder.Entity("Ecosystem_backend.Models.Cliente", b =>
                 {
-                    b.HasOne("Ecosystem_backend.Models.Prospecto", "ProspectoOrigen")
+                    b.HasOne("Ecosystem_backend.Models.Usuario", "Usuario")
                         .WithMany()
-                        .HasForeignKey("IdProspecto");
+                        .HasForeignKey("IdUsuario")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                    b.Navigation("ProspectoOrigen");
+                    b.Navigation("Usuario");
                 });
 
             modelBuilder.Entity("Ecosystem_backend.Models.Cotizacion", b =>

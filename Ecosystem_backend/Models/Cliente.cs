@@ -7,24 +7,29 @@ namespace Ecosystem_backend.Models
     public class Cliente
     {
         [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int IdCliente { get; set; }
 
+        // Enlazamos al prospecto del cual nació este cliente
+        public int? IdProspecto { get; set; }
+        [ForeignKey("IdProspecto")]
+        public Prospecto? ProspectoOrigen { get; set; }
+
+        // Mismos campos y reglas que Prospecto
         [Required]
-        public int IdUsuario { get; set; }
+        public string Nombre { get; set; } = string.Empty;
 
         [Required]
-        [MaxLength(150)]
-        public string NombreCompleto { get; set; } = string.Empty;
+        public string Apellido { get; set; } = string.Empty;
 
-        [MaxLength(255)]
-        public string? DireccionInstalacion { get; set; }
+        [Required]
+        public string Telefono { get; set; } = string.Empty;
 
-        [MaxLength(20)]
-        public string? Telefono { get; set; }
+        public string? Corporativo { get; set; }
 
-        // Propiedad de navegación (Relación 1:1)
-        [ForeignKey("IdUsuario")]
-        public Usuario? Usuario { get; set; }
+        [Required]
+        public string Localidad { get; set; } = string.Empty;
+
+        // Dato exclusivo del cliente
+        public DateTime FechaRegistro { get; set; } = DateTime.Now;
     }
 }
