@@ -171,9 +171,9 @@ namespace Ecosystem_backend.Controllers
             }
          */
         [HttpPut("cerrar-cotizacion/{idCotizacion}")]
-public async Task<IActionResult> CerrarCotizacion(int idCotizacion, [FromBody] CierreCotizacionDto request)
+public async Task<IActionResult> CerrarCotizacion(int IdCotizacion, [FromBody] CierreCotizacionDto request)
 {
-    var cotizacion = await _context.Cotizaciones.FindAsync(idCotizacion);
+    var cotizacion = await _context.Cotizaciones.FindAsync(IdCotizacion);
     if (cotizacion == null)
         return NotFound(new { Mensaje = "Cotización no encontrada." });
 
@@ -202,7 +202,7 @@ public async Task<IActionResult> CerrarCotizacion(int idCotizacion, [FromBody] C
             var nuevoUsuario = new Usuario
             {
                 Correo = request.Correo,
-                PasswordHash = request.Password, // <-- CORREGIDO DE request.Password A request.Contrasena
+                PasswordHash = request.Password,
                 IdRol = 1, //  1 es para 'Clientes'
                 Activo = true
             };
@@ -213,12 +213,14 @@ public async Task<IActionResult> CerrarCotizacion(int idCotizacion, [FromBody] C
             // 3. Clonar datos del prospecto a la tabla Clientes y asignar credenciales y rol
             var nuevoCliente = new Cliente
             {
+                IdUsuario = nuevoUsuario.IdUsuario,
+                IdProspecto = prospecto.IdProspecto,
                 Nombre = prospecto.Nombre,
-                Apellido = prospecto.Apellido,
                 Telefono = prospecto.Telefono,
                 Corporativo = prospecto.Corporativo,
+                FechaRegistro = DateTime.Now,
                 Localidad = prospecto.Localidad,
-                FechaRegistro = DateTime.Now
+                Apellido = prospecto.Apellido
             };
 
             _context.Clientes.Add(nuevoCliente);
@@ -244,8 +246,11 @@ public async Task<IActionResult> CerrarCotizacion(int idCotizacion, [FromBody] C
     {
         // Si algo falla, se deshacen todos los cambios parciales
         await transaction.RollbackAsync();
-        return StatusCode(500, new { Mensaje = "Error interno al procesar el cierre.", Detalle = ex.Message });
-    }
+                // Extraemos el error real de la base de datos si existe
+                var errorReal = ex.InnerException != null ? ex.InnerException.Message : ex.Message;
+
+                return StatusCode(500, new { Mensaje = "Error interno al procesar el cierre.", Detalle = errorReal });
+        }
 }
 
         // 5. Listar cotizaciones por usuario (Sistema Gestion - Clientes)

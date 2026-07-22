@@ -16,8 +16,8 @@
     public class CierreCotizacionDto
     {
         public string Accion { get; set; } = string.Empty; // "aceptar" o "rechazar"
-
-        public string? Correo { get; set; } = string.Empty; // Correo del cliente para notificación
-        public string? Password { get; set; } = string.Empty; // Contraseña para crear el usuario si acepta
+        public string Correo { get; set; } = string.Empty;
+        public string Password { get; set; } = string.Empty;
     }
-}
+
+    }
