@@ -14,6 +14,11 @@ namespace Ecosystem_backend.Models
         [ForeignKey("IdProspecto")]
         public Prospecto? ProspectoOrigen { get; set; }
 
+        [Required]
+        public int IdUsuario { get; set; }
+        [ForeignKey("IdUsuario")]
+        public Usuario? Usuario { get; set; }
+
         // Mismos campos y reglas que Prospecto
         [Required]
         public string Nombre { get; set; } = string.Empty;
@@ -31,5 +36,6 @@ namespace Ecosystem_backend.Models
 
         // Dato exclusivo del cliente
         public DateTime FechaRegistro { get; set; } = DateTime.Now;
+
     }
 }

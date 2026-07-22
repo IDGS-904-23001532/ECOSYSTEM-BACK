@@ -2,7 +2,8 @@
     using System.ComponentModel.DataAnnotations.Schema;
 
     namespace Ecosystem_backend.Models
-    {
+{
+    [Table("Cotizaciones")]
         public class Cotizacion
         {
             [Key]

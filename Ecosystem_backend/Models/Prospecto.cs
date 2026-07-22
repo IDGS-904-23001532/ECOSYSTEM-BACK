@@ -1,7 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Ecosystem_backend.Models
 {
+    [Table("Prospectos")]
     public class Prospecto
     {
         [Key]
@@ -23,5 +25,6 @@ namespace Ecosystem_backend.Models
 
         [Required]
         public string Estatus { get; set; } = "Pendiente"; // Pendiente, Aceptado, Cancelado
+
     }
 }
