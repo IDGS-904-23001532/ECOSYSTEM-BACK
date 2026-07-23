@@ -1,9 +1,9 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Ecosystem_backend.Data;
+using Ecosystem_backend.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Ecosystem_backend.Data;
-using Ecosystem_backend.Models;
-using Ecosystem_backend.DTOs;
+
+// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace Ecosystem_backend.Controllers
 {
@@ -12,58 +12,172 @@ namespace Ecosystem_backend.Controllers
     public class ProductoController : ControllerBase
     {
         private readonly AppDbContext _context;
+        private readonly IWebHostEnvironment _env;
 
-        // Inyectamos el contexto de la base de datos
-        public ProductoController(AppDbContext context)
+        // Contexto de la base de datos
+        public ProductoController(AppDbContext context, IWebHostEnvironment env)
         {
             _context = context;
+            _env = env;
         }
-        // 1. Crear un nuevo producto (Sistema de Gestion - Productos)
-        // http://localhost:5048/api/Producto/registrar-producto
-        /*
-         * POST
-         * {
-          "Nombre": "Panel Solar 300W",
-        "Descripcion": "Panel solar de alta eficiencia para sistemas residenciales y comerciales.",
-        "Precio": 250.00,
-        "RutaImagen": "https://example.com/images/panel_solar_300w.jpg"
-        }
-         */
-        [HttpPost("registrar-producto")]
-        public async Task<IActionResult> RegistrarProducto([FromBody] RegistroProductoDto request)
+
+        // GET: api/<ProductoController>
+        [HttpGet]
+        public async Task<IActionResult> GetProductos()
         {
-            // Validamos que el producto no exista ya (por nombre)
-            var existeProducto = await _context.Productos.AnyAsync(p => p.Nombre == request.Nombre);
-            if (existeProducto)
+            var list_productos = await _context.Productos.ToListAsync();
+
+            return Ok(list_productos);
+        }
+
+        // GET api/<ProductoController>/5
+        [HttpGet("{name}")]
+        public async Task<IActionResult> GetByNameProduct(string name)
+        {
+            var producto = await _context.Productos.FirstOrDefaultAsync(p => p.Nombre == name);
+
+            if (producto == null)
             {
-                return BadRequest(new { Mensaje = "El producto ya está registrado." });
+                return NotFound();
             }
 
-            // Creamos el nuevo producto
-            var nuevoProducto = new Producto
-            {
-                Nombre = request.Nombre,
-                Descripcion = request.Descripcion,
-                Precio = request.Precio,
-                RutaImagen = request.RutaImagen
-            };
-
-            _context.Productos.Add(nuevoProducto);
-            await _context.SaveChangesAsync();
-
-            return Ok(new { Mensaje = "Producto registrado con éxito", producto = nuevoProducto });
+            return Ok(producto);
         }
 
-        // 2/ Listar todos los productos (Sistema de Gestion - Productos)
-        // http://localhost:5048/api/Producto/listar-productos
-        /*
-         * GET
-         */
-        [HttpGet("listar-productos")]
-        public async Task<IActionResult> ListarProductos()
+        // POST api/<ProductoController>
+        [HttpPost]
+        public async Task<IActionResult> Post([FromForm] Producto product, IFormFile routeFile)
         {
-            var productos = await _context.Productos.ToListAsync();
-            return Ok(productos);
+            try
+            {
+                var product_exists = await _context.Productos.FirstOrDefaultAsync(p => p.Nombre == product.Nombre);
+
+                if (product_exists != null)
+                {
+                    return BadRequest("Este producto ya existe");
+                }
+
+                if (routeFile != null && routeFile.Length > 0)
+                {
+                    string carpeta_destino = Path.Combine(_env.WebRootPath, "Uploads");
+
+                    if (!Directory.Exists(carpeta_destino))
+                    {
+                        Directory.CreateDirectory(carpeta_destino);
+                    }
+
+                    string extension = Path.GetExtension(routeFile.FileName);
+                    string nombre_unico = Guid.NewGuid().ToString() + extension;
+                    string ruta_fisica = Path.Combine(carpeta_destino, nombre_unico);
+
+                    using (var stream = new FileStream(ruta_fisica, FileMode.Create))
+                    {
+                        await routeFile.CopyToAsync(stream);
+                    }
+
+                    product.RutaImagen = "/Uploads/" + nombre_unico;
+                }
+
+                _context.Productos.Add(product);
+                await _context.SaveChangesAsync();
+                return Ok(product);
+            }
+            catch (Exception e)
+            {
+                return StatusCode(500, "Error interno del servidor, consulte con el soporte técnico");
+            }
+        }
+
+        // PUT api/<ProductoController>/5
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Put(int id, [FromForm] Producto product, IFormFile routeFile)
+        {
+            if (product == null || id != product.IdProducto)
+            {
+                return BadRequest("Los datos enviados son invalidos");
+            }
+
+
+            try
+            {
+                var product_exists = await _context.Productos.FirstOrDefaultAsync(p => p.IdProducto == id);
+
+                if (product_exists == null)
+                {
+                    return NotFound("No se ha encontrado ninguna coincidencia");
+                }
+
+                if (routeFile != null && routeFile.Length > 0)
+                {
+                    if (!string.IsNullOrEmpty(product_exists.RutaImagen))
+                    {
+                        string ruta_anterior = Path.Combine(_env.WebRootPath, product_exists.RutaImagen.TrimStart('/'));
+                        if (System.IO.File.Exists(ruta_anterior))
+                        {
+                            System.IO.File.Delete(ruta_anterior);
+                        }
+                    }
+
+                    string carpeta_destino = Path.Combine(_env.WebRootPath, "Uploads");
+                    string extension = Path.GetExtension(routeFile.FileName);
+                    string nombre_unico = Guid.NewGuid().ToString() + extension;
+                    string ruta_fisica = Path.Combine(carpeta_destino, nombre_unico);
+
+                    using (var stream = new FileStream(ruta_fisica, FileMode.Create))
+                    {
+                        await routeFile.CopyToAsync(stream);
+                    }
+
+                    product_exists.RutaImagen = "/Uploads/" + nombre_unico;
+                }
+
+                product_exists.Nombre = product.Nombre;
+                product_exists.Descripcion = product.Descripcion;
+                product_exists.Precio = product.Precio;
+
+                await _context.SaveChangesAsync();
+
+                return Ok("Producto actualizado correctamente");
+            }
+            catch (Exception e)
+            {
+                return StatusCode(500, "Error interno del servidor, consulte con el soporte técnico");
+            }
+        }
+
+        // DELETE api/<ProductoController>/5
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            try
+            {
+                var product_exists = await _context.Productos.FirstOrDefaultAsync(p => p.IdProducto == id);
+
+                if (product_exists == null)
+                {
+                    return NotFound("El producto que intentas eliminar no existe.");
+                }
+
+                if (!string.IsNullOrEmpty(product_exists.RutaImagen))
+                {
+                    string ruta_archivo = Path.Combine(_env.WebRootPath, product_exists.RutaImagen.TrimStart('/'));
+
+                    if (System.IO.File.Exists(ruta_archivo))
+                    {
+                        System.IO.File.Delete(ruta_archivo);
+                    }
+                }
+
+                _context.Productos.Remove(product_exists);
+
+                await _context.SaveChangesAsync();
+
+                return Ok("Producto y archivos eliminados correctamente.");
+            }
+            catch (Exception e)
+            {
+                return StatusCode(500, "Error interno del servidor, consulte con el soporte técnico");
+            }
         }
     }
 }
