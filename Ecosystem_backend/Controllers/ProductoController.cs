@@ -1,18 +1,9 @@
-<<<<<<< HEAD
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Ecosystem_backend.Data;
-using Ecosystem_backend.Models;
-using Ecosystem_backend.DTOs;
-=======
-﻿using Ecosystem_backend.Data;
 using Ecosystem_backend.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
->>>>>>> fc2ca6f39b1d21020fc188bd2d473e1341cb0ace
 
 namespace Ecosystem_backend.Controllers
 {
@@ -21,63 +12,6 @@ namespace Ecosystem_backend.Controllers
     public class ProductoController : ControllerBase
     {
         private readonly AppDbContext _context;
-<<<<<<< HEAD
-
-        // Inyectamos el contexto de la base de datos
-        public ProductoController(AppDbContext context)
-        {
-            _context = context;
-        }
-        // 1. Crear un nuevo producto (Sistema de Gestion - Productos)
-        // http://localhost:5048/api/Producto/registrar-producto
-        /*
-         * POST
-         * {
-          "Nombre": "Panel Solar 300W",
-        "Descripcion": "Panel solar de alta eficiencia para sistemas residenciales y comerciales.",
-        "Precio": 250.00,
-        "RutaImagen": "https://example.com/images/panel_solar_300w.jpg"
-        }
-         */
-        [HttpPost("registrar-producto")]
-        public async Task<IActionResult> RegistrarProducto([FromBody] RegistroProductoDto request)
-        {
-            // Validamos que el producto no exista ya (por nombre)
-            var existeProducto = await _context.Productos.AnyAsync(p => p.Nombre == request.Nombre);
-            if (existeProducto)
-            {
-                return BadRequest(new { Mensaje = "El producto ya está registrado." });
-            }
-
-            // Creamos el nuevo producto
-            var nuevoProducto = new Producto
-            {
-                Nombre = request.Nombre,
-                Descripcion = request.Descripcion,
-                Precio = request.Precio,
-                RutaImagen = request.RutaImagen
-            };
-
-            _context.Productos.Add(nuevoProducto);
-            await _context.SaveChangesAsync();
-
-            return Ok(new { Mensaje = "Producto registrado con éxito", producto = nuevoProducto });
-        }
-
-        // 2/ Listar todos los productos (Sistema de Gestion - Productos)
-        // http://localhost:5048/api/Producto/listar-productos
-        /*
-         * GET
-         */
-        [HttpGet("listar-productos")]
-        public async Task<IActionResult> ListarProductos()
-        {
-            var productos = await _context.Productos.ToListAsync();
-            return Ok(productos);
-        }
-    }
-}
-=======
         private readonly IWebHostEnvironment _env;
 
         // Contexto de la base de datos
@@ -89,7 +23,7 @@ namespace Ecosystem_backend.Controllers
 
         // GET: api/<ProductoController>
         [HttpGet]
-        public async Task <IActionResult> GetProductos()
+        public async Task<IActionResult> GetProductos()
         {
             var list_productos = await _context.Productos.ToListAsync();
 
@@ -98,7 +32,7 @@ namespace Ecosystem_backend.Controllers
 
         // GET api/<ProductoController>/5
         [HttpGet("{name}")]
-        public async Task <IActionResult> GetByNameProduct(string name)
+        public async Task<IActionResult> GetByNameProduct(string name)
         {
             var producto = await _context.Productos.FirstOrDefaultAsync(p => p.Nombre == name);
 
@@ -127,7 +61,7 @@ namespace Ecosystem_backend.Controllers
                 {
                     string carpeta_destino = Path.Combine(_env.WebRootPath, "Uploads");
 
-                    if (!Directory.Exists(carpeta_destino)) 
+                    if (!Directory.Exists(carpeta_destino))
                     {
                         Directory.CreateDirectory(carpeta_destino);
                     }
@@ -157,7 +91,7 @@ namespace Ecosystem_backend.Controllers
         // PUT api/<ProductoController>/5
         [HttpPut("{id}")]
         public async Task<IActionResult> Put(int id, [FromForm] Producto product, IFormFile routeFile)
-        { 
+        {
             if (product == null || id != product.IdProducto)
             {
                 return BadRequest("Los datos enviados son invalidos");
@@ -171,7 +105,7 @@ namespace Ecosystem_backend.Controllers
                 if (product_exists == null)
                 {
                     return NotFound("No se ha encontrado ninguna coincidencia");
-                } 
+                }
 
                 if (routeFile != null && routeFile.Length > 0)
                 {
@@ -204,7 +138,8 @@ namespace Ecosystem_backend.Controllers
                 await _context.SaveChangesAsync();
 
                 return Ok("Producto actualizado correctamente");
-            } catch (Exception e)
+            }
+            catch (Exception e)
             {
                 return StatusCode(500, "Error interno del servidor, consulte con el soporte técnico");
             }
@@ -246,4 +181,3 @@ namespace Ecosystem_backend.Controllers
         }
     }
 }
->>>>>>> fc2ca6f39b1d21020fc188bd2d473e1341cb0ace
