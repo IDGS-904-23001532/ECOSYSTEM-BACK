@@ -15,12 +15,6 @@ namespace Ecosystem_backend.Models
         public Prospecto? ProspectoOrigen { get; set; }
 
         [Required]
-        public int IdUsuario { get; set; }
-        [ForeignKey("IdUsuario")]
-        public Usuario? Usuario { get; set; }
-
-        // Mismos campos y reglas que Prospecto
-        [Required]
         public string Nombre { get; set; } = string.Empty;
 
         [Required]
