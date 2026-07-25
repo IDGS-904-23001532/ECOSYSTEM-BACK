@@ -213,7 +213,7 @@ public async Task<IActionResult> CerrarCotizacion(int IdCotizacion, [FromBody] C
             // 3. Clonar datos del prospecto a la tabla Clientes y asignar credenciales y rol
             var nuevoCliente = new Cliente
             {
-                IdUsuario = nuevoUsuario.IdUsuario,
+                
                 IdProspecto = prospecto.IdProspecto,
                 Nombre = prospecto.Nombre,
                 Telefono = prospecto.Telefono,
@@ -259,33 +259,7 @@ public async Task<IActionResult> CerrarCotizacion(int IdCotizacion, [FromBody] C
          * GET
          */
         [HttpGet("usuario/{idUsuario}")]
-public async Task<IActionResult> ListarCotizacionesPorUsuario(int idUsuario)
-{
-    // 1. Validar que el usuario exista
-    var usuarioExiste = await _context.Usuarios.AnyAsync(u => u.IdUsuario == idUsuario);
-    if (!usuarioExiste)
-    {
-        return NotFound(new { Mensaje = "El usuario especificado no existe." });
-    }
 
-    // 2. Buscamos el perfil de cliente asociado a ese IdUsuario
-    var cliente = await _context.Clientes.FirstOrDefaultAsync(c => c.IdUsuario == idUsuario);
-    if (cliente == null)
-    {
-        return Ok(new List<Cotizacion>()); // Retorna lista vacía si el usuario no tiene perfil de cliente
-    }
-
-    // 3. Consultar las cotizaciones
-    // Nota: Como la cotización se vincula originalmente al IdProspecto, filtramos las cotizaciones 
-    // cuyos datos de prospecto coincidan con el cliente (o por IdProspecto si tu tabla Clientes guarda esa llave).
-    var cotizaciones = await _context.Cotizaciones
-        .Include(c => c.Prospecto)
-        .Where(c => c.Prospecto.Telefono == cliente.Telefono) // O cl.IdProspecto == c.IdProspecto si agregaron esa FK
-        .OrderByDescending(c => c.FechaEmision)
-        .ToListAsync();
-
-    return Ok(cotizaciones);
-}
 
         // 6. Editar una cotización existente
         // http://localhost:5048/api/Cotizacion/editar-cotizacion/1

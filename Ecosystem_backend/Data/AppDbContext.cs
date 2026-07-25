@@ -24,6 +24,7 @@ namespace Ecosystem_backend.Data
         public DbSet<Proveedor> Proveedores { get; set; }
         public DbSet<Gasto> Gastos { get; set; }
         public DbSet<OrdenServicio> OrdenesServicio { get; set; }
+        public DbSet<SesionTemporal> SesionesTemporales { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

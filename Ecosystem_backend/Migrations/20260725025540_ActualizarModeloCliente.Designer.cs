@@ -4,6 +4,7 @@ using Ecosystem_backend.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Ecosystem_backend.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260725025540_ActualizarModeloCliente")]
+    partial class ActualizarModeloCliente
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -309,32 +312,6 @@ namespace Ecosystem_backend.Migrations
                     b.HasKey("idRol");
 
                     b.ToTable("Roles");
-                });
-
-            modelBuilder.Entity("Ecosystem_backend.Models.SesionTemporal", b =>
-                {
-                    b.Property<int>("IdSesion")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("IdSesion"));
-
-                    b.Property<DateTime>("FechaExpiracion")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<DateTime>("FechaInicio")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<int>("IdUsuario")
-                        .HasColumnType("int");
-
-                    b.Property<string>("TokenJWT")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.HasKey("IdSesion");
-
-                    b.ToTable("SesionesTemporales");
                 });
 
             modelBuilder.Entity("Ecosystem_backend.Models.Usuario", b =>
