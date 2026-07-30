@@ -1,4 +1,4 @@
-﻿    using System.ComponentModel.DataAnnotations;
+    using System.ComponentModel.DataAnnotations;
     using System.ComponentModel.DataAnnotations.Schema;
 
     namespace Ecosystem_backend.Models
@@ -21,6 +21,10 @@
 
             [Required]
             public decimal TotalCotizado { get; set; }
+
+            public decimal CostoInstalacion { get; set; }
+
+            public decimal Iva { get; set; }
 
             [Required]
             public string Estatus { get; set; } = "Pendiente"; // Pendiente, Aceptada, Rechazada

@@ -53,7 +53,9 @@ namespace Ecosystem_backend.Controllers
                     ProspectoNombre = c.Prospecto != null ? c.Prospecto.Nombre + " " + c.Prospecto.Apellido : "Desconocido",
                     c.FechaEmision,
                     c.TotalCotizado,
-                    c.Estatus
+                    c.Estatus,
+                    c.CostoInstalacion,
+                    c.Iva
                 })
                 .ToListAsync();
 
@@ -157,10 +159,15 @@ namespace Ecosystem_backend.Controllers
                 });
             }
 
+            decimal ivaCalculado = (totalCalculado + request.CostoInstalacion) * 0.16m;
+            decimal totalFinal = totalCalculado + request.CostoInstalacion + ivaCalculado;
+
             var nuevaCotizacion = new Cotizacion
             {
                 IdProspecto = request.IdProspecto,
-                TotalCotizado = totalCalculado,
+                CostoInstalacion = request.CostoInstalacion,
+                Iva = ivaCalculado,
+                TotalCotizado = totalFinal,
                 FechaEmision = DateTime.Now,
                 Estatus = "Pendiente",
                 Detalles = detallesEntidad
@@ -412,9 +419,14 @@ namespace Ecosystem_backend.Controllers
                     });
                 }
 
+                decimal ivaCalculado = (totalCalculado + request.CostoInstalacion) * 0.16m;
+                decimal totalFinal = totalCalculado + request.CostoInstalacion + ivaCalculado;
+
                 // Actualizar la cotización principal
                 cotizacion.IdProspecto = request.IdProspecto;
-                cotizacion.TotalCotizado = totalCalculado;
+                cotizacion.CostoInstalacion = request.CostoInstalacion;
+                cotizacion.Iva = ivaCalculado;
+                cotizacion.TotalCotizado = totalFinal;
 
                 await _context.SaveChangesAsync();
                 await transaction.CommitAsync();

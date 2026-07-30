@@ -1,4 +1,4 @@
-﻿namespace Ecosystem_backend.DTOs
+namespace Ecosystem_backend.DTOs
 {
 
     public class DetalleCotizacionDto
@@ -11,6 +11,7 @@
     public class CrearCotizacionDto
     {
         public int IdProspecto { get; set; }
+        public decimal CostoInstalacion { get; set; }
         // El frontend enviará el arreglo de productos aquí
         public List<DetalleCotizacionDto> Detalles { get; set; } = new List<DetalleCotizacionDto>();
     }
