@@ -5,11 +5,13 @@
     {
         public int IdProducto { get; set; }
         public int Cantidad { get; set; }
+        public decimal Subtotal { get; set; }
     }
 
-    public class RegistroCotizacionDto
+    public class CrearCotizacionDto
     {
         public int IdProspecto { get; set; }
+        // El frontend enviará el arreglo de productos aquí
         public List<DetalleCotizacionDto> Detalles { get; set; } = new List<DetalleCotizacionDto>();
     }
 

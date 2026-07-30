@@ -16,6 +16,9 @@
 
             public DateTime FechaEmision { get; set; } = DateTime.Now;
 
+            // Relación uno a muchos con DetalleCotizacion
+            public ICollection<DetalleCotizacion> Detalles { get; set; } = new List<DetalleCotizacion>();
+
             [Required]
             public decimal TotalCotizado { get; set; }
 
