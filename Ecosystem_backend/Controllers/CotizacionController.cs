@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Ecosystem_backend.Data;
@@ -123,8 +123,39 @@ namespace Ecosystem_backend.Controllers
             if (request.Detalles == null || !request.Detalles.Any())
                 return BadRequest(new { mensaje = "La cotización debe incluir al menos un producto." });
 
-            // El total se calcula automáticamente sumando los subtotales del arreglo
-            decimal totalCalculado = request.Detalles.Sum(d => d.Subtotal);
+            // Obtener los precios y existencia real de los productos desde la base de datos
+            var productIds = request.Detalles.Select(d => d.IdProducto).Distinct().ToList();
+            var productosDb = await _context.Productos
+                .Where(p => productIds.Contains(p.IdProducto))
+                .ToDictionaryAsync(p => p.IdProducto);
+
+            // Validar que todos los productos solicitados existan
+            foreach (var idProd in productIds)
+            {
+                if (!productosDb.ContainsKey(idProd))
+                {
+                    return BadRequest(new { mensaje = $"El producto con ID {idProd} no existe en la base de datos." });
+                }
+            }
+
+            // Calcular subtotales y total general en el backend de forma segura
+            decimal totalCalculado = 0;
+            var detallesEntidad = new List<DetalleCotizacion>();
+
+            foreach (var d in request.Detalles)
+            {
+                var producto = productosDb[d.IdProducto];
+                decimal subtotal = producto.Precio * d.Cantidad;
+                totalCalculado += subtotal;
+
+                detallesEntidad.Add(new DetalleCotizacion
+                {
+                    IdProducto = d.IdProducto,
+                    Cantidad = d.Cantidad,
+                    PrecioUnitario = producto.Precio,
+                    Subtotal = subtotal
+                });
+            }
 
             var nuevaCotizacion = new Cotizacion
             {
@@ -132,13 +163,7 @@ namespace Ecosystem_backend.Controllers
                 TotalCotizado = totalCalculado,
                 FechaEmision = DateTime.Now,
                 Estatus = "Pendiente",
-                // Mapeamos el DTO a la entidad de la base de datos
-                Detalles = request.Detalles.Select(d => new DetalleCotizacion
-                {
-                    IdProducto = d.IdProducto,
-                    Cantidad = d.Cantidad,
-                    Subtotal = d.Subtotal
-                }).ToList()
+                Detalles = detallesEntidad
             };
 
             _context.Cotizaciones.Add(nuevaCotizacion);
@@ -305,6 +330,103 @@ namespace Ecosystem_backend.Controllers
             {
                 await transaction.RollbackAsync();
                 return StatusCode(500, new { mensaje = "Error al rechazar la cotización.", detalle = ex.Message });
+            }
+        }
+
+        // ==========================================
+        // 7. ACTUALIZAR COTIZACIÓN (PUT)
+        // ==========================================
+        /* 
+         * FRONTEND INFO:
+         * Método: PUT
+         * Ruta: /api/cotizacion/{id}
+         * 
+         * ¿Qué enviar? (JSON Body exacto esperado):
+         * {
+         *   "idProspecto": 1,
+         *   "detalles": [
+         *     {
+         *       "idProducto": 2,
+         *       "cantidad": 3
+         *     }
+         *   ]
+         * }
+         */
+        [HttpPut("{id}")]
+        public async Task<IActionResult> ActualizarCotizacion(int id, [FromBody] CrearCotizacionDto request)
+        {
+            var cotizacion = await _context.Cotizaciones
+                .Include(c => c.Detalles)
+                .FirstOrDefaultAsync(c => c.IdCotizacion == id);
+
+            if (cotizacion == null)
+                return NotFound(new { mensaje = "Cotización no encontrada." });
+
+            if (cotizacion.Estatus != "Pendiente")
+                return BadRequest(new { mensaje = $"Solo se pueden actualizar cotizaciones en estado 'Pendiente'. Estatus actual: {cotizacion.Estatus}." });
+
+            var prospectoExiste = await _context.Prospectos.AnyAsync(p => p.IdProspecto == request.IdProspecto);
+            if (!prospectoExiste)
+                return BadRequest(new { mensaje = "El prospecto seleccionado no existe en la base de datos." });
+
+            if (request.Detalles == null || !request.Detalles.Any())
+                return BadRequest(new { mensaje = "La cotización debe incluir al menos un producto." });
+
+            // Obtener los precios y existencia real de los productos desde la base de datos
+            var productIds = request.Detalles.Select(d => d.IdProducto).Distinct().ToList();
+            var productosDb = await _context.Productos
+                .Where(p => productIds.Contains(p.IdProducto))
+                .ToDictionaryAsync(p => p.IdProducto);
+
+            // Validar que todos los productos solicitados existan
+            foreach (var idProd in productIds)
+            {
+                if (!productosDb.ContainsKey(idProd))
+                {
+                    return BadRequest(new { mensaje = $"El producto con ID {idProd} no existe en la base de datos." });
+                }
+            }
+
+            using var transaction = await _context.Database.BeginTransactionAsync();
+
+            try
+            {
+                // Eliminar los detalles anteriores
+                _context.DetallesCotizaciones.RemoveRange(cotizacion.Detalles);
+
+                // Calcular subtotales y total general en el backend
+                decimal totalCalculado = 0;
+                var nuevosDetalles = new List<DetalleCotizacion>();
+
+                foreach (var d in request.Detalles)
+                {
+                    var producto = productosDb[d.IdProducto];
+                    decimal subtotalVal = producto.Precio * d.Cantidad;
+                    totalCalculado += subtotalVal;
+
+                    nuevosDetalles.Add(new DetalleCotizacion
+                    {
+                        IdProducto = d.IdProducto,
+                        Cantidad = d.Cantidad,
+                        PrecioUnitario = producto.Precio,
+                        Subtotal = subtotalVal
+                    });
+                }
+
+                // Actualizar la cotización principal
+                cotizacion.IdProspecto = request.IdProspecto;
+                cotizacion.TotalCotizado = totalCalculado;
+                cotizacion.Detalles = nuevosDetalles;
+
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                return Ok(new { mensaje = "Cotización actualizada con éxito.", cotizacion });
+            }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+                return StatusCode(500, new { mensaje = "Ocurrió un error al actualizar la cotización.", detalle = ex.Message });
             }
         }
     }

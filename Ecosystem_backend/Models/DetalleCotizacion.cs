@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Ecosystem_backend.Models
@@ -20,6 +20,9 @@ namespace Ecosystem_backend.Models
 
         [Required]
         public int Cantidad { get; set; }
+
+        [Required]
+        public decimal PrecioUnitario { get; set; }
 
         [Required]
         public decimal Subtotal { get; set; }
