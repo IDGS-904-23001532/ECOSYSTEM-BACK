@@ -391,12 +391,11 @@ namespace Ecosystem_backend.Controllers
 
             try
             {
-                // Eliminar los detalles anteriores
-                _context.DetallesCotizaciones.RemoveRange(cotizacion.Detalles);
+                // Limpiar los detalles anteriores (EF Core los marcará como eliminados automáticamente al guardar)
+                cotizacion.Detalles.Clear();
 
                 // Calcular subtotales y total general en el backend
                 decimal totalCalculado = 0;
-                var nuevosDetalles = new List<DetalleCotizacion>();
 
                 foreach (var d in request.Detalles)
                 {
@@ -404,7 +403,7 @@ namespace Ecosystem_backend.Controllers
                     decimal subtotalVal = producto.Precio * d.Cantidad;
                     totalCalculado += subtotalVal;
 
-                    nuevosDetalles.Add(new DetalleCotizacion
+                    cotizacion.Detalles.Add(new DetalleCotizacion
                     {
                         IdProducto = d.IdProducto,
                         Cantidad = d.Cantidad,
@@ -416,7 +415,6 @@ namespace Ecosystem_backend.Controllers
                 // Actualizar la cotización principal
                 cotizacion.IdProspecto = request.IdProspecto;
                 cotizacion.TotalCotizado = totalCalculado;
-                cotizacion.Detalles = nuevosDetalles;
 
                 await _context.SaveChangesAsync();
                 await transaction.CommitAsync();
