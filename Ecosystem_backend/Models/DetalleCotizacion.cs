@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace Ecosystem_backend.Models
 {
@@ -11,6 +12,7 @@ namespace Ecosystem_backend.Models
         [Required]
         public int IdCotizacion { get; set; }
         [ForeignKey("IdCotizacion")]
+        [JsonIgnore]
         public Cotizacion? Cotizacion { get; set; }
 
         [Required]
