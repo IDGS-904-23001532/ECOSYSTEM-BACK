@@ -2,6 +2,7 @@ using Ecosystem_backend.Data;
 using Ecosystem_backend.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.IO;
 
 namespace Ecosystem_backend.Controllers
 {
@@ -16,22 +17,6 @@ namespace Ecosystem_backend.Controllers
         {
             _context = context;
             _env = env;
-        }
-
-        // Método auxiliar seguro para obtener la ruta webroot sin que explote en producción si es null
-        private string GetWebRootPath()
-        {
-            if (!string.IsNullOrEmpty(_env.WebRootPath))
-            {
-                return _env.WebRootPath;
-            }
-            // Fallback seguro para contenedores en la nube (Railway/Docker) donde wwwroot no viene precreado
-            var fallbackPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
-            if (!Directory.Exists(fallbackPath))
-            {
-                Directory.CreateDirectory(fallbackPath);
-            }
-            return fallbackPath;
         }
 
         // GET: api/<ProductoController>
@@ -83,8 +68,7 @@ namespace Ecosystem_backend.Controllers
                 // Manejo seguro del archivo
                 if (routeFile != null && routeFile.Length > 0)
                 {
-                    string webRootPath = GetWebRootPath();
-                    string carpeta_destino = Path.Combine(webRootPath, "Uploads");
+                    string carpeta_destino = Path.Combine(Directory.GetCurrentDirectory(), "Uploads");
 
                     if (!Directory.Exists(carpeta_destino))
                     {
@@ -141,18 +125,16 @@ namespace Ecosystem_backend.Controllers
 
                 if (routeFile != null && routeFile.Length > 0)
                 {
-                    string webRootPath = GetWebRootPath();
-
                     if (!string.IsNullOrEmpty(product_exists.RutaImagen))
                     {
-                        string ruta_anterior = Path.Combine(webRootPath, product_exists.RutaImagen.TrimStart('/'));
+                        string ruta_anterior = Path.Combine(Directory.GetCurrentDirectory(), product_exists.RutaImagen.TrimStart('/'));
                         if (System.IO.File.Exists(ruta_anterior))
                         {
                             System.IO.File.Delete(ruta_anterior);
                         }
                     }
 
-                    string carpeta_destino = Path.Combine(webRootPath, "Uploads");
+                    string carpeta_destino = Path.Combine(Directory.GetCurrentDirectory(), "Uploads");
                     if (!Directory.Exists(carpeta_destino))
                     {
                         Directory.CreateDirectory(carpeta_destino);
@@ -202,8 +184,7 @@ namespace Ecosystem_backend.Controllers
 
                 if (!string.IsNullOrEmpty(product_exists.RutaImagen))
                 {
-                    string webRootPath = GetWebRootPath();
-                    string ruta_archivo = Path.Combine(webRootPath, product_exists.RutaImagen.TrimStart('/'));
+                    string ruta_archivo = Path.Combine(Directory.GetCurrentDirectory(), product_exists.RutaImagen.TrimStart('/'));
 
                     if (System.IO.File.Exists(ruta_archivo))
                     {
