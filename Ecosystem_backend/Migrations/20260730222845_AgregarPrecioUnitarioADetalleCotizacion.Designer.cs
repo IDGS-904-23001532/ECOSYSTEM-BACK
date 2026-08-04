@@ -4,6 +4,7 @@ using Ecosystem_backend.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Ecosystem_backend.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260730222845_AgregarPrecioUnitarioADetalleCotizacion")]
+    partial class AgregarPrecioUnitarioADetalleCotizacion
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -70,9 +73,6 @@ namespace Ecosystem_backend.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("IdCotizacion"));
 
-                    b.Property<decimal>("CostoInstalacion")
-                        .HasColumnType("decimal(65,30)");
-
                     b.Property<string>("Estatus")
                         .IsRequired()
                         .HasColumnType("longtext");
@@ -82,9 +82,6 @@ namespace Ecosystem_backend.Migrations
 
                     b.Property<int>("IdProspecto")
                         .HasColumnType("int");
-
-                    b.Property<decimal>("Iva")
-                        .HasColumnType("decimal(65,30)");
 
                     b.Property<decimal>("TotalCotizado")
                         .HasColumnType("decimal(65,30)");

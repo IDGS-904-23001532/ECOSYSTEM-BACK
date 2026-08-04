@@ -1,4 +1,4 @@
-﻿using Ecosystem_backend.Data;
+using Ecosystem_backend.Data;
 using Ecosystem_backend.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -23,7 +23,7 @@ namespace Ecosystem_backend.Controllers
 
         // GET: api/<ProductoController>
         [HttpGet]
-        public async Task <IActionResult> GetProductos()
+        public async Task<IActionResult> GetProductos()
         {
             var list_productos = await _context.Productos.ToListAsync();
 
@@ -32,7 +32,7 @@ namespace Ecosystem_backend.Controllers
 
         // GET api/<ProductoController>/5
         [HttpGet("{name}")]
-        public async Task <IActionResult> GetByNameProduct(string name)
+        public async Task<IActionResult> GetByNameProduct(string name)
         {
             var producto = await _context.Productos.FirstOrDefaultAsync(p => p.Nombre == name);
 
@@ -61,7 +61,7 @@ namespace Ecosystem_backend.Controllers
                 {
                     string carpeta_destino = Path.Combine(_env.WebRootPath, "Uploads");
 
-                    if (!Directory.Exists(carpeta_destino)) 
+                    if (!Directory.Exists(carpeta_destino))
                     {
                         Directory.CreateDirectory(carpeta_destino);
                     }
@@ -91,7 +91,7 @@ namespace Ecosystem_backend.Controllers
         // PUT api/<ProductoController>/5
         [HttpPut("{id}")]
         public async Task<IActionResult> Put(int id, [FromForm] Producto product, IFormFile routeFile)
-        { 
+        {
             if (product == null || id != product.IdProducto)
             {
                 return BadRequest("Los datos enviados son invalidos");
@@ -105,7 +105,7 @@ namespace Ecosystem_backend.Controllers
                 if (product_exists == null)
                 {
                     return NotFound("No se ha encontrado ninguna coincidencia");
-                } 
+                }
 
                 if (routeFile != null && routeFile.Length > 0)
                 {
@@ -138,7 +138,8 @@ namespace Ecosystem_backend.Controllers
                 await _context.SaveChangesAsync();
 
                 return Ok("Producto actualizado correctamente");
-            } catch (Exception e)
+            }
+            catch (Exception e)
             {
                 return StatusCode(500, "Error interno del servidor, consulte con el soporte técnico");
             }

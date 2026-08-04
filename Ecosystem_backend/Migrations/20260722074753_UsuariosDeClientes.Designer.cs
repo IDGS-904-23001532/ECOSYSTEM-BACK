@@ -4,6 +4,7 @@ using Ecosystem_backend.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Ecosystem_backend.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260722074753_UsuariosDeClientes")]
+    partial class UsuariosDeClientes
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -43,6 +46,9 @@ namespace Ecosystem_backend.Migrations
                     b.Property<int?>("IdProspecto")
                         .HasColumnType("int");
 
+                    b.Property<int>("IdUsuario")
+                        .HasColumnType("int");
+
                     b.Property<string>("Localidad")
                         .IsRequired()
                         .HasColumnType("longtext");
@@ -59,6 +65,8 @@ namespace Ecosystem_backend.Migrations
 
                     b.HasIndex("IdProspecto");
 
+                    b.HasIndex("IdUsuario");
+
                     b.ToTable("Clientes");
                 });
 
@@ -70,9 +78,6 @@ namespace Ecosystem_backend.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("IdCotizacion"));
 
-                    b.Property<decimal>("CostoInstalacion")
-                        .HasColumnType("decimal(65,30)");
-
                     b.Property<string>("Estatus")
                         .IsRequired()
                         .HasColumnType("longtext");
@@ -82,9 +87,6 @@ namespace Ecosystem_backend.Migrations
 
                     b.Property<int>("IdProspecto")
                         .HasColumnType("int");
-
-                    b.Property<decimal>("Iva")
-                        .HasColumnType("decimal(65,30)");
 
                     b.Property<decimal>("TotalCotizado")
                         .HasColumnType("decimal(65,30)");
@@ -112,9 +114,6 @@ namespace Ecosystem_backend.Migrations
 
                     b.Property<int>("IdProducto")
                         .HasColumnType("int");
-
-                    b.Property<decimal>("PrecioUnitario")
-                        .HasColumnType("decimal(65,30)");
 
                     b.Property<decimal>("Subtotal")
                         .HasColumnType("decimal(65,30)");
@@ -320,32 +319,6 @@ namespace Ecosystem_backend.Migrations
                     b.ToTable("Roles");
                 });
 
-            modelBuilder.Entity("Ecosystem_backend.Models.SesionTemporal", b =>
-                {
-                    b.Property<int>("IdSesion")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("IdSesion"));
-
-                    b.Property<DateTime>("FechaExpiracion")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<DateTime>("FechaInicio")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<int>("IdUsuario")
-                        .HasColumnType("int");
-
-                    b.Property<string>("TokenJWT")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.HasKey("IdSesion");
-
-                    b.ToTable("SesionesTemporales");
-                });
-
             modelBuilder.Entity("Ecosystem_backend.Models.Usuario", b =>
                 {
                     b.Property<int>("IdUsuario")
@@ -418,7 +391,15 @@ namespace Ecosystem_backend.Migrations
                         .WithMany()
                         .HasForeignKey("IdProspecto");
 
+                    b.HasOne("Ecosystem_backend.Models.Usuario", "Usuario")
+                        .WithMany()
+                        .HasForeignKey("IdUsuario")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("ProspectoOrigen");
+
+                    b.Navigation("Usuario");
                 });
 
             modelBuilder.Entity("Ecosystem_backend.Models.Cotizacion", b =>
@@ -435,7 +416,7 @@ namespace Ecosystem_backend.Migrations
             modelBuilder.Entity("Ecosystem_backend.Models.DetalleCotizacion", b =>
                 {
                     b.HasOne("Ecosystem_backend.Models.Cotizacion", "Cotizacion")
-                        .WithMany("Detalles")
+                        .WithMany()
                         .HasForeignKey("IdCotizacion")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -502,11 +483,6 @@ namespace Ecosystem_backend.Migrations
                         .IsRequired();
 
                     b.Navigation("Cliente");
-                });
-
-            modelBuilder.Entity("Ecosystem_backend.Models.Cotizacion", b =>
-                {
-                    b.Navigation("Detalles");
                 });
 #pragma warning restore 612, 618
         }
