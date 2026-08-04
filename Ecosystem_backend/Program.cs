@@ -1,5 +1,7 @@
 using Ecosystem_backend.Data;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.FileProviders;
+using System.IO;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -26,6 +28,19 @@ app.UseSwaggerUI(c =>
 
 // app.UseHttpsRedirection();
 app.UseStaticFiles();
+
+var webRootPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+
+if (!Directory.Exists(webRootPath))
+{
+    Directory.CreateDirectory(webRootPath);
+}
+
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(webRootPath),
+    RequestPath = "" // Permite que la URL sea directa: misitio.com/Uploads/foto.png
+});
 
 app.UseAuthorization();
 
